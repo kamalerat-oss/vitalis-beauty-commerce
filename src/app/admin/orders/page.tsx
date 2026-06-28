@@ -8,12 +8,22 @@ import StoreInitializer from '@/app/components/StoreInitializer';
 import Icon from '@/components/ui/AppIcon';
 import { formatRupiah, sessionStore } from '@/lib/localStorage';
 
+// Catatan: status "pending" (belum dibayar) dan "diproses" (sudah dibayar,
+// menunggu dikirim) keduanya dihitung sebagai "Pending" pada ringkasan di
+// kanan atas, karena keduanya berarti pesanan belum dikirim ke customer.
 const STATUSES = [
   { value: 'pending', label: 'Pending' },
-  { value: 'paid', label: 'Diproses' },
+  { value: 'diproses', label: 'Diproses' },
   { value: 'shipped', label: 'Dikirim' },
   { value: 'completed', label: 'Selesai' },
 ] as const;
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: 'Pending',
+  diproses: 'Diproses',
+  shipped: 'Dikirim',
+  completed: 'Selesai',
+};
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -54,8 +64,9 @@ export default function AdminOrdersPage() {
   };
 
   const grouped = useMemo(() => ({
-    pending: orders.filter((o) => o.status === 'pending').length,
-    paid: orders.filter((o) => o.status === 'paid').length,
+    // "pending" pada ringkasan mencakup order yang belum dibayar (pending)
+    // maupun yang sudah dibayar tapi belum dikirim (diproses).
+    pending: orders.filter((o) => o.status === 'pending' || o.status === 'diproses').length,
     shipped: orders.filter((o) => o.status === 'shipped').length,
     completed: orders.filter((o) => o.status === 'completed').length,
   }), [orders]);
@@ -130,7 +141,9 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="py-4 px-2 font-bold">{formatRupiah(o.total_price)}</td>
                       <td className="py-4 px-2">
-                        <span className="badge bg-muted">{o.status}</span>
+                        <span className="badge bg-muted">
+                          {STATUS_LABEL[o.status] ?? o.status}
+                        </span>
                       </td>
                       <td className="py-4 px-2 text-muted-foreground">
                         {new Date(o.created_at).toLocaleDateString('id-ID')}

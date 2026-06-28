@@ -19,6 +19,13 @@ interface Order {
   created_at: string;
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  pending: 'Pending',
+  diproses: 'Diproses',
+  shipped: 'Dikirim',
+  completed: 'Selesai',
+};
+
 export default function AdminReportsPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -57,8 +64,16 @@ export default function AdminReportsPage() {
     load();
   }, [router]);
 
+  // Revenue dihitung dari semua order yang SUDAH DIBAYAR, yaitu semua
+  // status kecuali "pending" (pending = belum bayar). Ini termasuk
+  // diproses, shipped, dan completed.
+  const paidOrders = orders.filter((o) => o.status !== 'pending');
+  const revenue = paidOrders.reduce((s, o) => s + Number(o.total_price), 0);
+
+  // "Pesanan Selesai" tetap dihitung khusus dari status completed saja,
+  // karena ini menunjukkan pesanan yang benar-benar tuntas (sudah diterima).
   const completed = orders.filter((o) => o.status === 'completed');
-  const revenue = completed.reduce((s, o) => s + Number(o.total_price), 0);
+
   const transactions = orders
     .slice()
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -97,7 +112,7 @@ export default function AdminReportsPage() {
                 <Icon name="ChartBarIcon" size={18} className="text-muted-foreground" />
               </div>
               <div className="text-3xl font-extrabold">{formatRupiah(revenue)}</div>
-              <div className="text-xs text-muted-foreground mt-1">Akumulasi pesanan selesai</div>
+              <div className="text-xs text-muted-foreground mt-1">Akumulasi (non-pending)</div>
             </div>
             <div className="glass-card rounded-3xl p-5">
               <div className="flex items-center justify-between mb-2">
@@ -151,7 +166,7 @@ export default function AdminReportsPage() {
                         <td className="py-4 px-2 text-muted-foreground">{t.customer_name ?? '-'}</td>
                         <td className="py-4 px-2 font-bold">{formatRupiah(Number(t.total_price))}</td>
                         <td className="py-4 px-2">
-                          <span className="badge bg-muted">{t.status}</span>
+                          <span className="badge bg-muted">{STATUS_LABEL[t.status] ?? t.status}</span>
                         </td>
                         <td className="py-4 px-2 text-muted-foreground">
                           {new Date(t.created_at).toLocaleDateString('id-ID')}

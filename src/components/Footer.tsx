@@ -68,10 +68,10 @@ export default function Footer() {
               </p>
               <ul className="space-y-3">
                 {[
-                  { label: 'Tentang Kami', href: '/' },
-                  { label: 'Cara Belanja', href: '/' },
-                  { label: 'Kebijakan Privasi', href: '/' },
-                  { label: 'Syarat & Ketentuan', href: '/' },
+                  { label: 'Tentang Kami', href: '/tentang-kami' },
+                  { label: 'Cara Belanja', href: '/cara-belanja' },
+                  { label: 'Kebijakan Privasi', href: '/kebijakan-privasi' },
+                  { label: 'Syarat & Ketentuan', href: '/syarat-ketentuan' },
                 ].map((item) => (
                   <li key={item.label}>
                     <Link
@@ -93,10 +93,10 @@ export default function Footer() {
             © {new Date().getFullYear()} Vitalis Beauty Commerce. All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <Link href="/" className="hover:text-primary transition-colors">
+            <Link href="/kebijakan-privasi" className="hover:text-primary transition-colors">
               Privasi
             </Link>
-            <Link href="/" className="hover:text-primary transition-colors">
+            <Link href="/syarat-ketentuan" className="hover:text-primary transition-colors">
               Ketentuan
             </Link>
             <span className="flex items-center gap-1.5">
