@@ -169,7 +169,7 @@ export default function AdminReportsPage() {
                           <span className="badge bg-muted">{STATUS_LABEL[t.status] ?? t.status}</span>
                         </td>
                         <td className="py-4 px-2 text-muted-foreground">
-                          {new Date(t.created_at).toLocaleDateString('id-ID')}
+                          {new Date(t.created_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' })}
                         </td>
                       </tr>
                     ))}

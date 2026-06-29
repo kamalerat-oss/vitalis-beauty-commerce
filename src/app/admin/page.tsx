@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
           .reduce((s: number, o: any) => s + Number(o.total_price), 0),
         completed: ordersData.filter((o: any) => o.status === 'completed').length,
         shipped: ordersData.filter((o: any) => o.status === 'shipped').length,
-        pending: ordersData.filter((o: any) => o.status === 'pending').length,
+        pending: ordersData.filter((o: any) => o.status === 'pending' || o.status === 'diproses').length,
         customersCount: usersData.count,
       });
     };

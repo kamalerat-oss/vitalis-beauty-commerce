@@ -275,6 +275,9 @@ export default function CheckoutPage() {
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Detail bank/e-wallet bisa dipilih di halaman pembayaran setelah pesanan dibuat.
+                </p>
 
                 <div className="mt-6">
                   <h2 className="text-sm font-extrabold uppercase tracking-wide text-primary mb-3">

@@ -146,7 +146,7 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
                       <td className="py-4 px-2 text-muted-foreground">
-                        {new Date(o.created_at).toLocaleDateString('id-ID')}
+                        {new Date(o.created_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' })}
                       </td>
                       <td className="py-4 px-2">
                         <select

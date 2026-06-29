@@ -267,7 +267,7 @@ export default function AuthPage() {
 
             {/* Admin hint */}
             <div className="mb-6 p-4 rounded-2xl bg-secondary border border-border text-xs text-muted-foreground">
-              <strong className="text-foreground">Demo Admin:</strong> admin@vitalis.com / admin123
+              <strong className="text-foreground">Demo Admin:</strong> admin@vitalisbeauty.com / admin123
             </div>
 
             {/* LOGIN FORM */}

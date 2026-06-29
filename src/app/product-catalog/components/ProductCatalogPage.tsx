@@ -538,6 +538,7 @@ useEffect(() => {
     }
     if (category !== 'Semua') list = list.filter((p) => p.category === category);
     list = list.filter((p) => p.price <= priceMax);
+    if (minRating > 0) list = list.filter((p) => Number(p.rating) >= minRating);
 
   switch (sort) {
   case 'price_asc':

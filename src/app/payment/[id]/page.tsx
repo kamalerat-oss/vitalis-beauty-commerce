@@ -32,6 +32,19 @@ type OrderDetail = {
   items?: OrderItem[];
 };
 
+const BANK_DETAILS: Record<string, { number: string; name: string }> = {
+  BCA: { number: '8800-1234-5678', name: 'PT Vitalis Beauty Commerce' },
+  BNI: { number: '0123-4567-89', name: 'PT Vitalis Beauty Commerce' },
+  BRI: { number: '0098-7654-3210', name: 'PT Vitalis Beauty Commerce' },
+  BTN: { number: '7711-2233-44', name: 'PT Vitalis Beauty Commerce' },
+};
+
+const EWALLET_DETAILS: Record<string, { number: string; name: string }> = {
+  DANA: { number: '0812-3456-7890', name: 'Vitalis Beauty Commerce' },
+  OVO: { number: '0812-3456-7890', name: 'Vitalis Beauty Commerce' },
+  GoPay: { number: '0812-3456-7890', name: 'Vitalis Beauty Commerce' },
+};
+
 export default function PaymentPage() {
   const router = useRouter();
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -39,6 +52,9 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
   const [done, setDone] = useState(false);
+
+  const [selectedBank, setSelectedBank] = useState('BCA');
+  const [selectedEwallet, setSelectedEwallet] = useState('DANA');
 
   useEffect(() => {
     try {
@@ -74,7 +90,20 @@ export default function PaymentPage() {
     if (!orderId) return;
     setConfirming(true);
     try {
-      const res = await fetch(`/api/orders/${orderId}/pay`, { method: 'POST' });
+      // Untuk Bank Transfer / E-Wallet, kirim juga detail bank/e-wallet
+      // spesifik yang dipilih user supaya tersimpan di catatan pembayaran.
+      let detailLabel = order?.payment_method ?? '';
+      if (order?.payment_method === 'Bank Transfer') {
+        detailLabel = `Bank Transfer - ${selectedBank}`;
+      } else if (order?.payment_method === 'E-Wallet') {
+        detailLabel = `E-Wallet - ${selectedEwallet}`;
+      }
+
+      const res = await fetch(`/api/orders/${orderId}/pay`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentDetail: detailLabel }),
+      });
       const data = await res.json();
 
       if (!data.success) {
@@ -82,6 +111,7 @@ export default function PaymentPage() {
         return;
       }
 
+      setOrder((prev) => (prev ? { ...prev, payment_method: detailLabel } : prev));
       setDone(true);
       if (data.emailSent) {
         showToast('Pembayaran berhasil! Invoice telah dikirim ke email kamu.', 'success');
@@ -156,6 +186,10 @@ export default function PaymentPage() {
       </>
     );
   }
+
+  const isQris = order.payment_method === 'QRIS';
+  const isBank = order.payment_method === 'Bank Transfer';
+  const isEwallet = order.payment_method === 'E-Wallet';
 
   return (
     <>
@@ -257,7 +291,7 @@ export default function PaymentPage() {
 
                   <div className="h-px bg-border mb-4" />
 
-                  {order.payment_method === 'QRIS' && (
+                  {isQris && (
                     <div className="text-center">
                       <p className="text-xs font-semibold text-muted-foreground mb-3">
                         Scan QR Code berikut menggunakan aplikasi e-wallet/m-banking kamu
@@ -271,15 +305,35 @@ export default function PaymentPage() {
                     </div>
                   )}
 
-                  {order.payment_method === 'Bank Transfer' && (
+                  {isBank && (
                     <div className="text-left">
-                      <p className="text-xs font-semibold text-muted-foreground mb-2">
-                        Transfer ke rekening berikut:
+                      <p className="text-xs font-semibold text-muted-foreground mb-3">
+                        Pilih bank tujuan transfer:
                       </p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {Object.keys(BANK_DETAILS).map((bank) => (
+                          <button
+                            key={bank}
+                            type="button"
+                            onClick={() => setSelectedBank(bank)}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                              selectedBank === bank
+                                ? 'border-primary bg-secondary text-primary'
+                                : 'border-border text-muted-foreground hover:border-primary'
+                            }`}
+                          >
+                            {bank}
+                          </button>
+                        ))}
+                      </div>
                       <div className="bg-muted rounded-xl p-4">
-                        <p className="text-xs text-muted-foreground">Bank Central Asia (BCA)</p>
-                        <p className="text-lg font-extrabold tracking-wide">8800-1234-5678</p>
-                        <p className="text-xs text-muted-foreground mt-1">a.n. PT Vitalis Beauty Commerce</p>
+                        <p className="text-xs text-muted-foreground">Bank {selectedBank}</p>
+                        <p className="text-lg font-extrabold tracking-wide">
+                          {BANK_DETAILS[selectedBank].number}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          a.n. {BANK_DETAILS[selectedBank].name}
+                        </p>
                       </div>
                       <p className="text-xs text-muted-foreground mt-3">
                         (Simulasi transfer untuk keperluan demo)
@@ -287,15 +341,35 @@ export default function PaymentPage() {
                     </div>
                   )}
 
-                  {order.payment_method === 'E-Wallet' && (
+                  {isEwallet && (
                     <div className="text-left">
-                      <p className="text-xs font-semibold text-muted-foreground mb-2">
-                        Bayar melalui E-Wallet:
+                      <p className="text-xs font-semibold text-muted-foreground mb-3">
+                        Pilih E-Wallet tujuan:
                       </p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {Object.keys(EWALLET_DETAILS).map((ew) => (
+                          <button
+                            key={ew}
+                            type="button"
+                            onClick={() => setSelectedEwallet(ew)}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                              selectedEwallet === ew
+                                ? 'border-primary bg-secondary text-primary'
+                                : 'border-border text-muted-foreground hover:border-primary'
+                            }`}
+                          >
+                            {ew}
+                          </button>
+                        ))}
+                      </div>
                       <div className="bg-muted rounded-xl p-4">
-                        <p className="text-xs text-muted-foreground">GoPay / OVO / DANA</p>
-                        <p className="text-lg font-extrabold tracking-wide">0812-3456-7890</p>
-                        <p className="text-xs text-muted-foreground mt-1">a.n. Vitalis Beauty Commerce</p>
+                        <p className="text-xs text-muted-foreground">{selectedEwallet}</p>
+                        <p className="text-lg font-extrabold tracking-wide">
+                          {EWALLET_DETAILS[selectedEwallet].number}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          a.n. {EWALLET_DETAILS[selectedEwallet].name}
+                        </p>
                       </div>
                       <p className="text-xs text-muted-foreground mt-3">
                         (Simulasi E-Wallet untuk keperluan demo)
